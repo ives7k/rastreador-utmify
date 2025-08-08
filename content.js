@@ -17,15 +17,13 @@ function runTracker() {
     if (!table) return;
 
     chrome.storage.local.get([budgetStorageKey], (result) => {
-        if (chrome.runtime.lastError) {
-            return;
-        }
         const budgetTimestamps = result[budgetStorageKey] || {};
         const headers = [...table.querySelectorAll('thead th')];
         
         const campaignIndex = headers.findIndex(th => th.innerText.toLowerCase().includes('campanha'));
         const profitIndex = headers.findIndex(th => th.innerText.toLowerCase().includes('lucro'));
         const roiIndex = headers.findIndex(th => th.innerText.toLowerCase().includes('roi'));
+        const salesIndex = headers.findIndex(th => th.innerText.toLowerCase().includes('vendas'));
 
         if (campaignIndex === -1) return;
 
@@ -42,7 +40,7 @@ function runTracker() {
             container.style.cssText = "margin-top: 8px; display: flex; align-items: center; font-size: 12px;";
 
             const button = document.createElement('button');
-            button.title = "Marcar horário, lucro e ROI da alteração";
+            button.title = "Marcar horário, lucro, ROI e vendas da alteração";
             button.innerHTML = saveIconSVG;
             button.style.cssText = `margin-right: 10px; background: none; border: none; cursor: pointer; padding: 4px; line-height: 0; color: #aaa; transition: color 0.2s;`;
             button.onmouseover = () => { button.style.color = '#fff'; };
@@ -54,15 +52,19 @@ function runTracker() {
 
             const clockIcon = document.createElement('span');
             clockIcon.innerHTML = clockIconSVG;
-            clockIcon.style.cssText = "margin-right: 8px; color: #888; display: flex; align-items: center;";
+            clockIcon.style.cssText = "margin-right: 8px; color: #888; line-height: 0;";
 
             const textDisplay = document.createElement('span');
             textDisplay.className = 'unified-display';
-            textDisplay.style.cssText = "transition: color 0.3s; display: flex; align-items: center;";
+            textDisplay.style.cssText = "transition: color 0.3s;";
 
             const savedData = budgetTimestamps[uniqueKey];
             if (savedData && typeof savedData === 'object') {
-                textDisplay.innerText = `${savedData.time} - LUCRO: ${savedData.profit} | ROI: ${savedData.roi}`.toUpperCase();
+                let displayText = `${savedData.time} - LUCRO: ${savedData.profit} | ROI: ${savedData.roi}`;
+                if (savedData.sales) { // Garante compatibilidade com dados antigos
+                    displayText += ` | VENDAS: ${savedData.sales}`;
+                }
+                textDisplay.innerText = displayText.toUpperCase();
                 textDisplay.style.color = '#FFFFFF';
             } else {
                 textDisplay.innerText = 'Nenhuma alteração registrada.';
@@ -78,25 +80,21 @@ function runTracker() {
 
                 const currentProfit = (profitIndex > -1 && row.cells[profitIndex]) ? row.cells[profitIndex].innerText : 'N/A';
                 const currentRoi = (roiIndex > -1 && row.cells[roiIndex]) ? row.cells[roiIndex].innerText : 'N/A';
+                const currentSales = (salesIndex > -1 && row.cells[salesIndex]) ? row.cells[salesIndex].innerText : 'N/A';
 
                 const dataToSave = {
                     time: formattedTime,
                     profit: currentProfit,
-                    roi: currentRoi
+                    roi: currentRoi,
+                    sales: currentSales
                 };
 
                 chrome.storage.local.get([budgetStorageKey], (currentResult) => {
-                    if (chrome.runtime.lastError) {
-                        return;
-                    }
                     const currentTimestamps = currentResult[budgetStorageKey] || {};
                     currentTimestamps[uniqueKey] = dataToSave;
                     
                     chrome.storage.local.set({ [budgetStorageKey]: currentTimestamps }, () => {
-                        if (chrome.runtime.lastError) {
-                            return;
-                        }
-                        textDisplay.innerText = `${dataToSave.time} - LUCRO: ${dataToSave.profit} | ROI: ${dataToSave.roi}`.toUpperCase();
+                        textDisplay.innerText = `${dataToSave.time} - LUCRO: ${dataToSave.profit} | ROI: ${dataToSave.roi} | VENDAS: ${dataToSave.sales}`.toUpperCase();
                         
                         textDisplay.style.color = '#FFD700';
                         
