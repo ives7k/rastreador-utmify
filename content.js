@@ -1,6 +1,6 @@
 const budgetStorageKey = 'utmifyBudgetTimestamps';
 
-const permanentColor = '#4CAF50'; // Verde
+const permanentColor = 'rgb(40, 199, 111)'; // Verde
 const flashColor = '#FFD700'; // Amarelo
 const noDataColor = '#888'; // Cinza
 
