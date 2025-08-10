@@ -1,5 +1,9 @@
 const budgetStorageKey = 'utmifyBudgetTimestamps';
 
+const permanentColor = '#4CAF50'; // Verde
+const flashColor = '#FFD700'; // Amarelo
+const noDataColor = '#888'; // Cinza
+
 const saveIconSVG = `
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy" viewBox="0 0 16 16">
   <path d="M11 2H9v3h2V2Z"/>
@@ -17,6 +21,9 @@ function runTracker() {
     if (!table) return;
 
     chrome.storage.local.get([budgetStorageKey], (result) => {
+        if (chrome.runtime.lastError) {
+            return;
+        }
         const budgetTimestamps = result[budgetStorageKey] || {};
         const headers = [...table.querySelectorAll('thead th')];
         
@@ -43,7 +50,7 @@ function runTracker() {
             button.title = "Marcar horário, lucro, ROI e vendas da alteração";
             button.innerHTML = saveIconSVG;
             button.style.cssText = `margin-right: 10px; background: none; border: none; cursor: pointer; padding: 4px; line-height: 0; color: #aaa; transition: color 0.2s;`;
-            button.onmouseover = () => { button.style.color = '#fff'; };
+            button.onmouseover = () => { button.style.color = permanentColor; };
             button.onmouseout = () => { button.style.color = '#aaa'; };
 
             const displayWrapper = document.createElement('div');
@@ -52,33 +59,33 @@ function runTracker() {
 
             const clockIcon = document.createElement('span');
             clockIcon.innerHTML = clockIconSVG;
-            clockIcon.style.cssText = "margin-right: 8px; color: #FFD700; line-height: 0;";
+            clockIcon.style.cssText = `margin-right: 8px; display: flex; align-items: center;`;
 
             const textDisplay = document.createElement('span');
             textDisplay.className = 'unified-display';
-            textDisplay.style.cssText = "transition: color 0.3s;";
+            textDisplay.style.cssText = "transition: color 0.3s; display: flex; align-items: center;";
+
+            const setDisplayColors = (color) => {
+                textDisplay.style.color = color;
+                clockIcon.style.color = color;
+            };
 
             const savedData = budgetTimestamps[uniqueKey];
             if (savedData && typeof savedData === 'object') {
                 let displayText = `${savedData.time} - LUCRO: ${savedData.profit} | ROI: ${savedData.roi}`;
-                if (savedData.sales) { // Garante compatibilidade com dados antigos
+                if (savedData.sales) {
                     displayText += ` | VENDAS: ${savedData.sales}`;
                 }
                 textDisplay.innerText = displayText.toUpperCase();
-                textDisplay.style.color = '#FFD700';
+                setDisplayColors(permanentColor);
             } else {
                 textDisplay.innerText = 'Nenhuma alteração registrada.';
-                textDisplay.style.color = '#888';
+                setDisplayColors(noDataColor);
             }
             
             button.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-
-                button.style.color = '#FFD700';
-                setTimeout(() => {
-                    button.style.color = '#aaa'; 
-                }, 1500);
 
                 const now = new Date();
                 const formattedTime = now.toLocaleTimeString('pt-BR');
@@ -95,13 +102,23 @@ function runTracker() {
                 };
 
                 chrome.storage.local.get([budgetStorageKey], (currentResult) => {
+                    if (chrome.runtime.lastError) {
+                        return;
+                    }
                     const currentTimestamps = currentResult[budgetStorageKey] || {};
                     currentTimestamps[uniqueKey] = dataToSave;
                     
                     chrome.storage.local.set({ [budgetStorageKey]: currentTimestamps }, () => {
+                        if (chrome.runtime.lastError) {
+                            return;
+                        }
                         textDisplay.innerText = `${dataToSave.time} - LUCRO: ${dataToSave.profit} | ROI: ${dataToSave.roi} | VENDAS: ${dataToSave.sales}`.toUpperCase();
                         
-                        textDisplay.style.color = '#FFD700';
+                        setDisplayColors(flashColor);
+                        
+                        setTimeout(() => {
+                           setDisplayColors(permanentColor);
+                        }, 500);
                     });
                 });
             };
