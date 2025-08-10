@@ -1,3 +1,4 @@
+// Desenvolvido por @ives7k
 const budgetStorageKey = 'utmifyBudgetTimestamps';
 
 const permanentColor = 'rgb(40, 199, 111)'; // Verde
