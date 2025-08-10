@@ -59,7 +59,7 @@ function runTracker() {
 
             const clockIcon = document.createElement('span');
             clockIcon.innerHTML = clockIconSVG;
-            clockIcon.style.cssText = `margin-right: 8px; display: flex; align-items: center;`;
+            clockIcon.style.cssText = `margin-right: 8px; display: flex; align-items: center; transition: color 0.3s;`;
 
             const textDisplay = document.createElement('span');
             textDisplay.className = 'unified-display';
