@@ -1,11 +1,22 @@
 {
   "manifest_version": 3,
   "name": "Rastreador de Orçamento UTMify (Estável)",
-  "version": "10.0",
+  "version": "10.1",
   "description": "Adiciona um botão para registrar e exibir a hora da última alteração de orçamento nas campanhas do UTMify.",
   "permissions": [
     "storage"
   ],
+  "action": {
+    "default_title": "Rastreador UTMify - Preferências",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_ui": {
+    "page": "popup.html",
+    "open_in_tab": true
+  },
   "content_scripts": [
     {
       "matches": [
