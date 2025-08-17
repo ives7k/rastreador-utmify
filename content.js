@@ -85,7 +85,7 @@ function runTracker() {
 
                 const displayWrapper = document.createElement('div');
                 displayWrapper.className = 'timestamp-display-wrapper';
-                displayWrapper.style.cssText = `display: flex; align-items: center; flex-wrap: wrap; background-color: rgba(255, 255, 255, 0.05); padding: 4px 10px; border-radius: 12px; font-weight: bold;`;
+                displayWrapper.style.cssText = `display: flex; align-items: center; flex-wrap: nowrap; background-color: rgba(255, 255, 255, 0.05); padding: 4px 10px; border-radius: 12px; font-weight: bold; white-space: nowrap; gap: 6px;`;
 
                 clockIcon = document.createElement('span');
                 clockIcon.innerHTML = clockIconSVG;
@@ -93,7 +93,7 @@ function runTracker() {
 
                 textDisplay = document.createElement('span');
                 textDisplay.className = 'unified-display';
-                textDisplay.style.cssText = "transition: color 0.3s; display: flex; align-items: center;";
+                textDisplay.style.cssText = "transition: color 0.3s; display: flex; align-items: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; min-width: 0;";
 
                 const setDisplayColors = (color) => {
                     textDisplay.style.color = color;
